@@ -1,0 +1,21 @@
+# Git / editor
+.git
+.gitignore
+**/.vscode
+**/.idea
+**/.vs
+
+# Dependencies and build output
+**/node_modules
+**/dist
+**/coverage
+**/.cache
+
+# Secrets (Compose env_file still reads these from the host)
+**/.env
+**/.env.*
+
+# Logs and docs
+**/npm-debug.log*
+*.md
+LICENSE

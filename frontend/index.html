@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestione auto</title>
+    <script>
+      (function () {
+        try {
+          var theme = localStorage.getItem("theme");
+          if (theme === "dark") document.documentElement.classList.add("dark");
+          else document.documentElement.classList.add("light");
+        } catch (e) {}
+      })();
+    </script>
+    <script src="https://carimagesapi.com/assets/js/carimages.js"
+        data-api-key="ci_91abdf6f67378a6838471e063d67745d86311711803259a50dda7344" async></script>
+  </head>
+  <body  class="">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+!backend/.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Frontend (Vite)
+frontend/dist/
+frontend/dist-ssr/
+*.local
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+dist
+
+frontend/src/companyData/logos/*
+frontend/src/companyData/company.json
+frontend/src/companyData/adminEmail.json
+
+.agents
+.claude
+skills-lock.json

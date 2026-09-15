@@ -1,0 +1,17 @@
+{
+  "name": "dashboard-auto",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -k -n backend,frontend -c red,blue npm:dev:backend npm:dev:frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "setup": "concurrently \"cd backend && npm install\" \"cd frontend && npm install\"",
+    "start": "npm run start --prefix frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "dependencies": {
+    "motion": "^13.2.0"
+  }
+}

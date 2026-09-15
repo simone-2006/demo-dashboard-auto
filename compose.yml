@@ -1,0 +1,111 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: frontend
+    ports:
+      - "9090:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      API_UPSTREAM: http://backend:3001
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: backend
+    environment:
+      NODE_ENV: production
+      DB_SERVER: sqlserver
+    env_file:
+      - backend/.env
+    depends_on:
+      sqlserver-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  mailer:
+    profiles:
+      - mailer
+    build:
+      context: ./backend/emailSender
+      dockerfile: Dockerfile
+    container_name: mailer
+    env_file:
+      - backend/.env
+    environment:
+      DEFAULT_SERVER_ADDRESS: http://backend:3001
+      TZ: Europe/Rome
+    volumes:
+      - ./frontend/src/companyData/adminEmail.json:/app/adminEmail.json:ro
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
+
+  # SQL Server resta sulla rete Compose: nessuna porta 1433 verso l'host.
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
+    container_name: sqlserver
+    env_file:
+      - backend/.env
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Express
+      MSSQL_MEMORY_LIMIT_MB: "1536"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: [ "CMD-SHELL", '/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$$MSSQL_SA_PASSWORD" -C -Q "SELECT 1" -b -o /dev/null' ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    restart: unless-stopped
+
+  sqlserver-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
+    container_name: sqlserver-init
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    env_file:
+      - backend/.env
+    environment:
+      ACCEPT_EULA: "Y"
+    volumes:
+      - ./setup_DB:/scripts:ro
+    entrypoint: [ "/bin/bash", "-lc" ]
+    command:
+      - set +H; /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$MSSQL_SA_PASSWORD" -C -b -i /scripts/init-docker.sql && /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$MSSQL_SA_PASSWORD" -C -b -i /scripts/seed-demo.sql
+    restart: "no"
+
+  demo-reset:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
+    container_name: demo-reset
+    depends_on:
+      sqlserver-init:
+        condition: service_completed_successfully
+    env_file:
+      - backend/.env
+    environment:
+      ACCEPT_EULA: "Y"
+      TZ: Europe/Rome
+    volumes:
+      - ./setup_DB:/scripts:ro
+    entrypoint: [ "/bin/bash", "-lc" ]
+    command:
+      - exec /bin/bash /scripts/reset-demo.sh
+    restart: unless-stopped
+
+volumes:
+  sqlserver-data:

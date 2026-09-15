@@ -1,0 +1,15 @@
+services:
+  mailer:
+    build:
+      context: .
+    container_name: mailer
+    env_file:
+      - ../.env
+    environment:
+      DEFAULT_SERVER_ADDRESS: http://host.docker.internal:3001
+      TZ: Europe/Rome
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ../../frontend/src/companyData/adminEmail.json:/app/adminEmail.json:ro
+    restart: unless-stopped
